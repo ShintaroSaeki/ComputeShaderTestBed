@@ -1,0 +1,59 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel SingleColor
+#pragma kernel MultipleColor
+#pragma kernel Circle
+#pragma kernel SquareInSquare
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> Result;
+int Resolution;
+
+float InCircle(float2 pt, float2 center, float radius) 
+{
+    float dist = distance(pt, center);
+
+    return 1 - step(radius, dist);
+}
+
+[numthreads(8,8,1)]
+void SingleColor (uint3 id : SV_DispatchThreadID)
+{
+    // TODO: insert actual code here!
+
+    Result[id.xy] = float4(1, 0, 0, 1);
+}
+
+[numthreads(8, 8, 1)]
+void MultipleColor(uint3 id : SV_DispatchThreadID)
+{
+    // TODO: insert actual code here!
+
+    int halfRes = Resolution >> 1;
+
+    Result[id.xy] = float4(step(halfRes, id.x), step(halfRes, id.y), 0, 1);
+}
+
+[numthreads(8, 8, 1)]
+void Circle(uint3 id : SV_DispatchThreadID)
+{
+    // TODO: insert actual code here!
+
+    int halfRes = Resolution >> 1;
+    int radius = Resolution >> 2;
+
+    Result[id.xy] = float4(InCircle(float2((float)id.x, (float)id.y), float2((float)halfRes, (float)halfRes), radius),
+                           InCircle(float2((float)id.x, (float)id.y), float2((float)halfRes, (float)halfRes), radius),
+                           0,
+                           1);
+}
+
+[numthreads(8, 8, 1)]
+void SquareInSquare(uint3 id : SV_DispatchThreadID)
+{
+    // TODO: insert actual code here!
+    int halfRes = Resolution >> 1;
+    int edgeLength = Resolution >> 2;
+
+    Result[id.xy] = float4(step((float)edgeLength, abs((float)halfRes - (float)id.x)), 0, 0, 1);
+}
